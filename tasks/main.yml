@@ -1,0 +1,6 @@
+---
+# tasks file for ansible-grafana-docker
+- include: install.yml
+
+- include: post_install.yml
+  when: orgs is defined

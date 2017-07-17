@@ -1,0 +1,14 @@
+---
+# install file for ansible-grafana-docker
+    - name: grafana container
+      docker_container:
+        name: grafana
+        image: "{{image}}"
+        state: started
+        pull: true
+        docker_api_version: "{{ docker_api_version }}"
+        restart_policy: always
+        network_mode: host
+        env: "{{environment_vars | default(omit)}}"
+        ports:
+          - "{{grafana_port}}:3000"

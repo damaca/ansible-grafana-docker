@@ -1,0 +1,42 @@
+---
+# post_install file for ansible-grafana-docker
+    - name: Pause some seconds to give the containers time to start 
+      pause:
+        seconds: 10
+
+    - name: Install grafana python api client
+      pip:
+        name: "grafana_api_client"
+       
+    - name: Create organizations
+      gf_org:
+        name: "{{item.name}}"
+        gf_password: "{{admin_pass}}"
+      with_items: "{{orgs}}"
+      run_once: "{{run_once_post_install | default(omit)}}"
+
+    - name: Create users
+      gf_user:
+        name: "{{item.1.name}}"
+        password: "{{item.1.password}}"
+        role: "{{item.1.role}}"
+        org: "{{item.0.name}}"
+        gf_password: "{{admin_pass}}"
+      with_subelements: 
+        - "{{orgs}}"
+        - users
+      run_once: "{{run_once_post_install | default(omit)}}"
+
+    - name: Create datasource
+      gf_datasource:
+        name: "{{item.1.name}}"
+        type: "{{item.1.type}}"
+        url: "{{item.1.url}}"
+        database: "{{item.1.database}}"
+        jsondata: "{{item.1.jsondata | to_json | default(omit)}}"
+        org: "{{item.0.name}}"
+        gf_password: "{{admin_pass}}"
+      with_subelements:
+        - "{{orgs}}"
+        - datasources
+      run_once: "{{run_once_post_install | default(omit)}}"
