@@ -2,7 +2,7 @@
 # post_install file for ansible-grafana-docker
     - name: Pause some seconds to give the containers time to start 
       pause:
-        seconds: 10
+        seconds: 20
 
     - name: Install grafana python api client
       pip:
