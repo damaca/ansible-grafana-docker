@@ -3,7 +3,7 @@
     - name: grafana container
       docker_container:
         name: grafana
-        image: "{{image}}"
+        image: "{{grafana_docker_image}}"
         state: started
         pull: true
         docker_api_version: "{{ docker_api_version }}"
