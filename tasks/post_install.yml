@@ -1,12 +1,22 @@
 ---
 # post_install file for ansible-grafana-docker
-    - name: Pause some seconds to give the containers time to start 
-      pause:
-        seconds: 20
-
     - name: Install grafana python api client
       pip:
         name: "grafana_api_client"
+
+    - name: Check api status and retry until is available
+      uri:
+        url: "http://127.0.0.1:{{grafana_port}}/api/admin/settings"
+        method: GET
+        user: admin
+        password: "{{admin_pass}}"
+        force_basic_auth: yes
+        status_code: 200
+      register: httpresponse
+      until: httpresponse.status == 200
+      until: httpresponse.status == 200
+      retries: 5
+      delay: 10
        
     - name: Create organizations
       gf_org:
