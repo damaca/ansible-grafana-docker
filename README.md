@@ -37,12 +37,15 @@ Role Variables
                password: prueba
            datasources:
              - "{{datasources.filebeat}}"
+           dashboards:
+             - { name: "test", file: "files/somefile.json" }
          - name: product
            users:
              - name: pruebaprod
                role: Viewer
                password: prueba
            datasources: []
+           dashboards: []
 
 ```
 

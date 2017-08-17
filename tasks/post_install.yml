@@ -49,3 +49,14 @@
         - "{{orgs}}"
         - datasources
       run_once: "{{run_once_post_install | default(omit)}}"
+
+    - name: Create dashboards
+      gf_dashboard:
+        name: "{{item.1.name}}"
+        jsondata: "{{lookup('file',item.1.file) | from_json }}"
+        org: "{{item.0.name}}"
+        gf_password: "{{admin_pass}}"
+      with_subelements:
+        - "{{orgs}}"
+        - dashboards
+      run_once: "{{run_once_post_install | default(omit)}}"
