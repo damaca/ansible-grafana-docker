@@ -113,7 +113,7 @@ def main():
         isdefault=dict(default=False,type='bool'),
         access=dict(default='proxy', choices=['direct', 'proxy']),
         user=dict(default=''),
-        password=dict(default=''),
+        password=dict(default='',no_log=True),
         jsondata=dict(default={},type='raw'),
         state=dict(default='present', choices=['absent', 'present']),
         gf_user=dict(default='admin'),
