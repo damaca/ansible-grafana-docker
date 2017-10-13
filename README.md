@@ -18,7 +18,7 @@ Role Variables
          GF_SECURITY_ADMIN_PASSWORD: "{{admin_pass}}"
          GF_SERVER_DOMAIN: "{{ domain }}"
          GF_SERVER_ROOT_URL: "https://{{ domain }}/grafana"
-         GF_DATABASE_URL: "mysql://grafana:grafanapass@{{inventory_hostname | get_hostname}}:3306/grafana"
+         GF_DATABASE_URL: "mysql://grafana:grafanapass@{{inventory_hostname}:3306/grafana"
        notifications:
          email:
          name: email
