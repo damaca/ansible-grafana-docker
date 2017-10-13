@@ -50,6 +50,18 @@
         - datasources
       run_once: "{{run_once_post_install | default(omit)}}"
 
+    - name: Create notifications
+      gf_notifications:
+        name: "{{item.1.name}}"
+        notification_type: "{{item.1.type}}"
+        org: "{{item.0.name}}"
+        settings: "{{item.1.settings | to_json | default(omit)}}"
+        gf_password: "{{admin_pass}}"
+      with_subelements:
+        - "{{orgs}}"
+        - notifications
+      run_once: "{{run_once_post_install | default(omit)}}"
+
     - name: Create dashboards
       gf_dashboard:
         name: "{{item.1.name}}"

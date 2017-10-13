@@ -1,18 +1,23 @@
 #!/usr/bin/python
 #coding: utf-8 -*-
 import ipaddress
+import requests
+import json
 from grafana_api_client import GrafanaClientError
 from grafana_api_client import GrafanaClient
+import logging
+
+logging.basicConfig(filename="/tmp/test.txt", level=logging.INFO)
 
 
 DOCUMENTATION = '''
 ---
-module: gf_dashboard
-short_description: Create/Delete dashboard
+module: gf_notifications
+short_description: Create/Delete alert notifications
 version_added: "2.3"
 author: "@damaca"
 description:
-   - Create/delete dashboard in Grafana
+   - Create/delete alert notifications in Grafana
 options:
    state:
      description:
@@ -22,20 +27,20 @@ options:
      default: present
    name:
      description:
-        - dashboard name
+        - alert notification name
      required: true
    org:
      description:
-        - Organization where the dashboard will be created
+        - Organization where the alert notification will be created
      required: true
-   jsondata:
+   settings:
      description:
-        - Extra parameters
+        - Extra settings
      required: false
      default: {}
-   overwrite:
+   type:
      description:
-        - Overwrite an existing dashboard
+        - type of alert notification ['email','slack','telegram']
      required: false
      default: False
    gf_user:
@@ -61,11 +66,12 @@ options:
 requirements:
     - "python >= 2.6"
     - "grafana_api_client"
+    - "requests"
 '''
 
 EXAMPLES = '''
 # Create a new (or update an existing) dashboard
-- gf_dashboard:
+- gf_notifications:
     state: present
     name: My org
 '''
@@ -74,9 +80,10 @@ def main():
     argument_spec = dict(
         name=dict(required=True),
         org=dict(required=True),
-        jsondata=dict(default={},type='raw'),
+        settings=dict(default={},type='raw'),
         state=dict(default='present', choices=['absent', 'present']),
-        overwrite=dict(required=False, default=False, type='bool', choices=[True,False]),
+        notification_type=dict(required=True,  choices=['email','slack','telegram']),
+        isdefault=dict(default=True,type='bool'),
         gf_user=dict(default='admin'),
         gf_password=dict(default='admin',no_log=True),
         gf_host=dict(default='127.0.0.1'),
@@ -93,10 +100,11 @@ def main():
                            supports_check_mode=True)
     
     state = module.params['state']
-    dashboard_name = module.params['name']
+    ntf_name = module.params['name']
     org_name = module.params['org']
-    overwrite= module.params['overwrite']
-    ds_json = module.params['jsondata']
+    ntf_type= module.params['notification_type']
+    isdefault = module.params['isdefault']
+    settings = module.params['settings']
     gf_user = module.params['gf_user']
     gf_password = module.params['gf_password']
     gf_host = module.params['gf_host']
@@ -112,34 +120,31 @@ def main():
     if not len(orgs) > 0:
       module.fail_json(msg='The organization '+org_name+' does not exist.')
 
-    # Changing some values with the parameter values
-    ds_json['dashboard']['title'] = dashboard_name 
-    ds_json['dashboard']['id'] = 'null'
-    ds_json['dashboard']['version'] = 0
-
-    slug = dashboard_name.replace(" ","-")
     #Change user context to the desired org
     client.user.using[orgs[0]['id']].create()
+
+    url_base = 'http://'+gf_host+':'+str(gf_port)+'/api/alert-notifications'
     
-    try:
-      g_dashboard = client.dashboards.db[slug]() 
-      # If we get some dashboard and overwrite is True we change the id and increment the version number
-      if overwrite:
-        ds_json['dashboard']['id'] = g_dashboard['dashboard']['id']
-        ds_json['dashboard']['version'] = g_dashboard['dashboard']['version'] + 1 
-    except GrafanaClientError as e:
-      if '404' in str(e):
-        g_dashboard = None
+    ntf = None
+    ntfr = requests.get(url_base, auth=(gf_user,gf_password), headers={'Content-Type': 'application/json'})
+    
+    for nt in ntfr.json():
+      if ntf_name == nt['name']:
+        ntf = nt
+
 
     if state == 'present':
-      if g_dashboard == None or overwrite:
-        ds_created = client.dashboards.db.create(dashboard=ds_json['dashboard'],overwrite=overwrite)
-        module.exit_json(changed=True,slug=ds_created['slug'],version=ds_created['version'])
+      if ntf == None:
+        body = { 'name': ntf_name, 'type': ntf_type, 'isDefault': isdefault, 'settings': settings }
+        ntf_createdr = requests.post(url_base, auth=(gf_user,gf_password), headers={'Content-Type': 'application/json'}, data=json.dumps(body))
+        ntf_created = ntf_createdr.json() 
+        logging.info(ntf_createdr.text)
+        module.exit_json(changed=True,notifications_id=ntf_created['id'])
       else:
-        module.exit_json(changed=False,slug=slug, version=g_dashboard['dashboard']['version'])
+        module.exit_json(changed=False,notifications_id=ntf['id'])
     elif state == 'absent':
-      if g_dashboard != None:
-        client.dashboards.db.delete(slug=slug)
+      if ntf != None:
+        requests.delete(url_base+'/'+ntf['id'], auth=(gf_user,gf_password), headers={'Content-Type': 'application/json'})
         module.exit_json(changed=True)
       else:
         module.exit_json(changed=False)
