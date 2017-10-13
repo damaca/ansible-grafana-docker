@@ -19,6 +19,12 @@ Role Variables
          GF_SERVER_DOMAIN: "{{ domain }}"
          GF_SERVER_ROOT_URL: "https://{{ domain }}/grafana"
          GF_DATABASE_URL: "mysql://grafana:grafanapass@{{inventory_hostname | get_hostname}}:3306/grafana"
+       notifications:
+         email:
+         name: email
+         type: email
+         settings:
+           addresses: "someaddress@any.com"
        datasources:
          filebeat:
            name: filebeat
@@ -39,6 +45,8 @@ Role Variables
              - "{{datasources.filebeat}}"
            dashboards:
              - { name: "test", file: "files/somefile.json" }
+           notifications:
+             - "{{notifications.email}}"
          - name: product
            users:
              - name: pruebaprod
@@ -46,6 +54,7 @@ Role Variables
                password: prueba
            datasources: []
            dashboards: []
+           notifications: []
 
 ```
 
