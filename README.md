@@ -44,7 +44,8 @@ Role Variables
            datasources:
              - "{{datasources.filebeat}}"
            dashboards:
-             - { name: "test", file: "files/somefile.json" }
+             - { name: "test", file: "files/somefile.json" } # Using files
+             - { name: "test", template: "templates/somefile.json.j2" } # Using templates 
            notifications:
              - "{{notifications.email}}"
          - name: product

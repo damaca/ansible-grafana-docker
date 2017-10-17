@@ -62,7 +62,19 @@
         - notifications
       run_once: "{{run_once_post_install | default(omit)}}"
 
-    - name: Create dashboards
+    - name: Create dashboards with templates
+      gf_dashboard:
+        name: "{{item.1.name}}"
+        jsondata: "{{lookup('template',item.1.template,convert_data=False) | from_json }}"
+        org: "{{item.0.name}}"
+        gf_password: "{{admin_pass}}"
+      with_subelements:
+        - "{{orgs}}"
+        - dashboards
+      run_once: "{{run_once_post_install | default(omit)}}"
+      when: item.1.template is defined
+
+    - name: Create dashboards with files
       gf_dashboard:
         name: "{{item.1.name}}"
         jsondata: "{{lookup('file',item.1.file) | from_json }}"
@@ -72,3 +84,4 @@
         - "{{orgs}}"
         - dashboards
       run_once: "{{run_once_post_install | default(omit)}}"
+      when: item.1.file is defined
