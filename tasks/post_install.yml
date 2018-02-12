@@ -23,6 +23,8 @@
         gf_password: "{{admin_pass}}"
       with_items: "{{orgs}}"
       run_once: "{{run_once_post_install | default(omit)}}"
+      loop_control:
+          label: "{{item.name}}"
 
     - name: Create users
       gf_user:
@@ -35,6 +37,8 @@
         - "{{orgs}}"
         - users
       run_once: "{{run_once_post_install | default(omit)}}"
+      loop_control:
+          label: "{{item.1.name}}"
 
     - name: Create datasource
       gf_datasource:
@@ -49,6 +53,8 @@
         - "{{orgs}}"
         - datasources
       run_once: "{{run_once_post_install | default(omit)}}"
+      loop_control:
+          label: "{{item.1.name}}"
 
     - name: Create notifications
       gf_notifications:
@@ -61,6 +67,8 @@
         - "{{orgs}}"
         - notifications
       run_once: "{{run_once_post_install | default(omit)}}"
+      loop_control:
+          label: "{{item.1.name}}"
 
     - name: Create dashboards with templates
       gf_dashboard:
@@ -73,6 +81,8 @@
         - dashboards
       run_once: "{{run_once_post_install | default(omit)}}"
       when: item.1.template is defined
+      loop_control:
+          label: "{{item.1.name}}"
 
     - name: Create dashboards with files
       gf_dashboard:
@@ -85,3 +95,5 @@
         - dashboards
       run_once: "{{run_once_post_install | default(omit)}}"
       when: item.1.file is defined
+      loop_control:
+          label: "{{item.1.name}}"
