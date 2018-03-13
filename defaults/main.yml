@@ -1,6 +1,7 @@
 ---
 # defaults file for ansible-grafana-docker
-grafana_docker_image: "grafana/grafana:4.4.1"
+grafana_version: "5.0.1"
+grafana_docker_image: "grafana/grafana"
 grafana_port: 3000
 docker_api_version: "1.22"
 admin_pass: "admin"
