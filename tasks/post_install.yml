@@ -47,6 +47,7 @@
         url: "{{item.1.url}}"
         database: "{{item.1.database}}"
         jsondata: "{{item.1.jsondata | to_json | default(omit)}}"
+        jsonsecuredata: "{{item.1.jsonsecuredata | to_json | default(omit)}}"
         org: "{{item.0.name}}"
         gf_password: "{{admin_pass}}"
       with_subelements:
