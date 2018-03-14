@@ -107,7 +107,7 @@ def main():
         name=dict(required=True),
         org=dict(required=True),
         url=dict(required=True),
-        type=dict(required=True, choices=['elasticsearch', 'cloudwatch', 'influxdb', 'mysql', 'opentsdb', 'prometheus', 'graphite']),
+        type=dict(required=True, choices=['elasticsearch', 'cloudwatch', 'influxdb', 'mysql', 'opentsdb', 'prometheus', 'graphite', 'grafana-simple-json-datasource', 'grafana-azure-monitor-datasource']),
         database=dict(required=True),
         basicauth=dict(default=False,type='bool'),
         isdefault=dict(default=False,type='bool'),
@@ -115,6 +115,7 @@ def main():
         user=dict(default=''),
         password=dict(default='',no_log=True),
         jsondata=dict(default={},type='raw'),
+        jsonsecuredata=dict(default={},type='raw'),
         state=dict(default='present', choices=['absent', 'present']),
         gf_user=dict(default='admin'),
         gf_password=dict(default='admin',no_log=True),
@@ -143,6 +144,7 @@ def main():
     password = module.params['password']
     access = module.params['access']
     jsondata = module.params['jsondata']
+    jsonsecuredata = module.params['jsonsecuredata']
     gf_user = module.params['gf_user']
     gf_password = module.params['gf_password']
     gf_host = module.params['gf_host']
@@ -171,7 +173,7 @@ def main():
 
     if state == 'present':
       if curr_ds == None:
-        ds_created = client.datasources.create(name=datasource_name,type=ds_type,user=user,password=password,url=url,orgid=orgs[0]['id'],database=database,basicauth=basicauth,access=access,jsondata=jsondata)
+        ds_created = client.datasources.create(name=datasource_name,type=ds_type,user=user,password=password,url=url,orgid=orgs[0]['id'],database=database,basicauth=basicauth,access=access,jsondata=jsondata,securejsondata=jsonsecuredata)
         module.exit_json(changed=True,id=ds_created['id'],name=datasource_name)
       else:
         module.exit_json(changed=False,id=curr_ds['id'],name=datasource_name)
