@@ -31,7 +31,7 @@ options:
    type:
      description:
         - datasource type 
-     choices: ['elasticsearch', 'cloudwatch', 'influxdb', 'mysql', 'opentsdb', 'prometheus', 'graphite']
+     choices: ['elasticsearch', 'cloudwatch', 'influxdb', 'mysql', 'opentsdb', 'prometheus', 'graphite', 'grafana-simple-json-datasource', 'grafana-azure-monitor-datasource']
      required: true
    url:
      description:
@@ -46,6 +46,14 @@ options:
         - enable basic auth
      required: false
      default: false
+   basicauthuser:
+     description:
+        - basic auth user
+     required: false
+   basicauthpassword:
+     description:
+        - basic auth password
+     required: false
    user:
      description:
         - Database user
@@ -107,14 +115,17 @@ def main():
         name=dict(required=True),
         org=dict(required=True),
         url=dict(required=True),
-        type=dict(required=True, choices=['elasticsearch', 'cloudwatch', 'influxdb', 'mysql', 'opentsdb', 'prometheus', 'graphite']),
+        type=dict(required=True, choices=['elasticsearch', 'cloudwatch', 'influxdb', 'mysql', 'opentsdb', 'prometheus', 'graphite', 'grafana-simple-json-datasource', 'grafana-azure-monitor-datasource']),
         database=dict(required=True),
         basicauth=dict(default=False,type='bool'),
+        basicauthuser=dict(default=''),
+        basicauthpassword=dict(default='',no_log=True),
         isdefault=dict(default=False,type='bool'),
         access=dict(default='proxy', choices=['direct', 'proxy']),
         user=dict(default=''),
         password=dict(default='',no_log=True),
         jsondata=dict(default={},type='raw'),
+        securejsondata=dict(default={},type='raw'),
         state=dict(default='present', choices=['absent', 'present']),
         gf_user=dict(default='admin'),
         gf_password=dict(default='admin',no_log=True),
@@ -138,11 +149,14 @@ def main():
     ds_type = module.params['type']
     database = module.params['database']
     basicauth = module.params['basicauth']
+    basicauthuser = module.params['basicauthuser']
+    basicauthpassword = module.params['basicauthpassword']
     isdefault = module.params['isdefault']
     user = module.params['user']
     password = module.params['password']
     access = module.params['access']
     jsondata = module.params['jsondata']
+    securejsondata = module.params['securejsondata']
     gf_user = module.params['gf_user']
     gf_password = module.params['gf_password']
     gf_host = module.params['gf_host']
@@ -171,7 +185,7 @@ def main():
 
     if state == 'present':
       if curr_ds == None:
-        ds_created = client.datasources.create(name=datasource_name,type=ds_type,user=user,password=password,url=url,orgid=orgs[0]['id'],database=database,basicauth=basicauth,access=access,jsondata=jsondata)
+        ds_created = client.datasources.create(name=datasource_name,type=ds_type,user=user,password=password,url=url,orgid=orgs[0]['id'],database=database,basicauth=basicauth,access=access,jsondata=jsondata,securejsondata=securejsondata,basicauthuser=basicauthuser,basicauthpassword=basicauthpassword)
         module.exit_json(changed=True,id=ds_created['id'],name=datasource_name)
       else:
         module.exit_json(changed=False,id=curr_ds['id'],name=datasource_name)
