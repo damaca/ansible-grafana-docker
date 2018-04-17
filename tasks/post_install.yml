@@ -82,6 +82,7 @@
         jsondata: "{{lookup('template',item.1.template,convert_data=False) | from_json }}"
         org: "{{item.0.name}}"
         gf_password: "{{admin_pass}}"
+        overwrite: true
       with_subelements:
         - "{{orgs}}"
         - dashboards
