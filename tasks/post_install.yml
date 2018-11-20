@@ -14,8 +14,8 @@
         status_code: 200
       register: httpresponse
       until: httpresponse.status == 200
-      retries: 5
-      delay: 10
+      retries: 10
+      delay: 20
        
     - name: Create organizations
       gf_org:
